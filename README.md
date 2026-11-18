@@ -1,5 +1,7 @@
 # NAIVE — Supply Chain Intelligence & Predictive Analytics Platform
 
+> **🚀 Live Streamlit Application:** [View Live App Here](https://naive-supply-chain-platform-cwuframikabiq2sj3fpxqt.streamlit.app/)
+
 ## Project Overview
 NAIVE is a dual-mode Business Intelligence (BI) and Machine Learning web application built with Python and Streamlit. It transforms raw, uncleaned supply chain exports (`.csv`, `.xlsx`, `.parquet`) into executive KPIs, logistics SLA bottleneck diagnostics, profitability and discount leakage insights, customer and geospatial intelligence, and real-time late-delivery risk predictions.
 
@@ -70,6 +72,7 @@ python -m pip install -r requirements.txt
    python -m streamlit run app.py
    ```
 4. Upload a `.csv`, `.xlsx`, or `.parquet` file (or download the built-in 500-row sample CSV template) in **0 — Data Studio**, clean it, and activate it to unlock all analytical pages.
+
 
 ## Project Outcome
 NAIVE delivers an end-to-end decision-support platform that bridges raw operational data cleaning, executive BI dashboards, and prescriptive machine learning in a single interactive web application.
