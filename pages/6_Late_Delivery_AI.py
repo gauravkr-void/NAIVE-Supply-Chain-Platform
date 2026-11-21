@@ -194,7 +194,18 @@ with tab_batch:
         if batch_file is not None:
             batch_raw, _ = read_uploaded_file(batch_file)
             scored_df = batch_predict_df(pipeline, batch_raw)
-            st.success(f"Scored {len(scored_df):,} orders.")
+            high_risk_cnt = int((scored_df["Risk_Probability"] >= 65.0).sum())
+            high_risk_pct = (high_risk_cnt / len(scored_df) * 100) if len(scored_df) else 0.0
+            avg_prob = float(scored_df["Risk_Probability"].mean()) if len(scored_df) else 0.0
+
+            b1, b2, b3 = st.columns(3)
+            with b1:
+                render_kpi_card("Orders Scored", f"{len(scored_df):,}", "Batch CSV rows processed", "neutral", COLORS["blue"])
+            with b2:
+                render_kpi_card("High-Risk Orders (>=65%)", f"{high_risk_cnt:,}", f"{high_risk_pct:.1f}% of batch", "negative" if high_risk_pct > 40 else "neutral", COLORS["red"])
+            with b3:
+                render_kpi_card("Avg Predicted Late Risk", f"{avg_prob:.1f}%", "Mean batch probability", "negative" if avg_prob >= 50 else "positive", COLORS["amber"])
+            render_spacer("sm")
             st.dataframe(scored_df.head(50), use_container_width=True)
 
             render_spacer("sm")
