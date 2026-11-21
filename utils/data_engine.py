@@ -518,7 +518,14 @@ def render_global_sidebar() -> pd.DataFrame | None:
             st.info(f"Custom Upload ({len(df):,} rows)")
 
         st.divider()
-        st.markdown("#### Global Slicers")
+        col_f_hdr, col_f_rst = st.columns([2, 1])
+        with col_f_hdr:
+            st.markdown("#### Global Slicers")
+        with col_f_rst:
+            if st.button("Reset", use_container_width=True, help="Clear all active sidebar filters"):
+                for k in ("global_date_range", "global_market", "global_region", "global_ship_mode", "global_segment"):
+                    st.session_state.pop(k, None)
+                st.rerun()
 
         mask = pd.Series(True, index=df.index)
 
