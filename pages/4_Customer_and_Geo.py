@@ -165,6 +165,15 @@ with c_rfm:
                 use_container_width=True,
                 hide_index=True,
                 height=175,
+                
+            )
+            at_risk_df = rfm[rfm["Cohort"].isin(["At-Risk", "Churned"])].sort_values("Monetary", ascending=False)
+            st.download_button(
+                label=f"Export At-Risk & Churned Customers ({len(at_risk_df):,})",
+                data=at_risk_df[["Customer Id", "Cohort", "Recency", "Frequency", "Monetary"]].to_csv(index=False).encode("utf-8"),
+                file_name="naive_at_risk_customers.csv",
+                mime="text/csv",
+                use_container_width=True,
             )
         else:
             st.info("RFM requires `Customer Id`, `order_date`, and `Sales`.")
@@ -221,6 +230,14 @@ with c_abc:
                 use_container_width=True,
                 hide_index=True,
                 height=175,
+            )
+            class_a_df = abc[abc["ABC_Class"] == "Class A (Top 80%)"]
+            st.download_button(
+                label=f"Export Class A Core SKUs ({len(class_a_df):,})",
+                data=class_a_df[["Product Name", "Sales", "Profit", "Orders", "Cum_Pct"]].to_csv(index=False).encode("utf-8"),
+                file_name="naive_class_a_skus.csv",
+                mime="text/csv",
+                use_container_width=True,
             )
         else:
             st.info("ABC Classification requires `Product Name` and `Sales`.")
