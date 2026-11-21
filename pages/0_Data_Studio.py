@@ -140,62 +140,66 @@ with col_upload:
                 st.rerun()
 
 with col_side:
-    with st.container(border=True, key="card_ds_actions"):
-        render_card_header(
-            "Quick Actions & Export",
-            "Templates, cleaned exports, and session controls.",
+    if st.button("Load 180k Benchmark Dataset", type="primary", use_container_width=True):
+        with st.spinner("Loading 180,519-row historical benchmark..."):
+            bench_df = load_benchmark_data()
+        st.session_state["df_active"] = bench_df
+        st.session_state["data_mode"] = "Benchmark (180k)"
+        st.session_state["dataset_name"] = "supply_chain_data.parquet"
+        st.session_state["capabilities"] = evaluate_capabilities(bench_df)
+        st.session_state["ingestion_audit"] = {"schema_status": "Exact Auto-Matched"}
+        st.rerun()
+
+    bench_sample = load_benchmark_data().head(500).to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="Download Sample CSV Template",
+        data=bench_sample,
+        file_name="naive_sample_supply_chain.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+    export_df = staged_clean if staged_clean is not None else df_active
+    if export_df is None:
+        st.markdown(
+            """
+            <div class="quick-info-list">
+                <div class="quick-info-row"><span class="quick-info-key">Supported Formats</span><span class="quick-info-val">CSV, Excel, Parquet</span></div>
+                <div class="quick-info-row"><span class="quick-info-key">Sample Template</span><span class="quick-info-val">500 pre-formatted rows</span></div>
+                <div class="quick-info-row"><span class="quick-info-key">Auto Sanitization</span><span class="quick-info-val">PII pruning &amp; KPI fill</span></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-        bench_sample = load_benchmark_data().head(500).to_csv(index=False).encode("utf-8")
+    if export_df is not None:
+        clean_csv = export_df.head(100000).to_csv(index=False).encode("utf-8")
         st.download_button(
-            label="Download Sample CSV Template",
-            data=bench_sample,
-            file_name="naive_sample_supply_chain.csv",
+            label="Export Cleaned CSV",
+            data=clean_csv,
+            file_name="naive_cleaned_supply_chain.csv",
             mime="text/csv",
-            type="primary",
+            use_container_width=True,
+        )
+        pq_buf = io.BytesIO()
+        export_df.to_parquet(pq_buf, index=False, compression="snappy")
+        st.download_button(
+            label="Export Cleaned Parquet",
+            data=pq_buf.getvalue(),
+            file_name="naive_cleaned_supply_chain.parquet",
+            mime="application/octet-stream",
             use_container_width=True,
         )
 
-        export_df = staged_clean if staged_clean is not None else df_active
-        if export_df is None:
-            st.markdown(
-                """
-                <div class="quick-info-list">
-                    <div class="quick-info-row"><span class="quick-info-key">Supported Formats</span><span class="quick-info-val">CSV, Excel, Parquet</span></div>
-                    <div class="quick-info-row"><span class="quick-info-key">Sample Template</span><span class="quick-info-val">500 pre-formatted rows</span></div>
-                    <div class="quick-info-row"><span class="quick-info-key">Auto Sanitization</span><span class="quick-info-val">PII pruning &amp; KPI fill</span></div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        if export_df is not None:
-            clean_csv = export_df.head(100000).to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="Export Cleaned CSV",
-                data=clean_csv,
-                file_name="naive_cleaned_supply_chain.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
-            pq_buf = io.BytesIO()
-            export_df.to_parquet(pq_buf, index=False, compression="snappy")
-            st.download_button(
-                label="Export Cleaned Parquet",
-                data=pq_buf.getvalue(),
-                file_name="naive_cleaned_supply_chain.parquet",
-                mime="application/octet-stream",
-                use_container_width=True,
-            )
-
-        if df_active is not None or staged_clean is not None:
-            if st.button("Clear & Reset Session", use_container_width=True):
-                for k in (
-                    "df_active", "data_mode", "ingestion_audit",
-                    "staged_raw_df", "staged_raw_meta", "staged_clean_df", "staged_audit",
-                ):
-                    st.session_state[k] = None
-                st.session_state["dataset_name"] = "No dataset loaded"
-                st.session_state["capabilities"] = {}
-                st.rerun()
+    if df_active is not None or staged_clean is not None:
+        if st.button("Clear & Reset Session", use_container_width=True):
+            for k in (
+                "df_active", "data_mode", "ingestion_audit",
+                "staged_raw_df", "staged_raw_meta", "staged_clean_df", "staged_audit",
+            ):
+                st.session_state[k] = None
+            st.session_state["dataset_name"] = "No dataset loaded"
+            st.session_state["capabilities"] = {}
+            st.rerun()
 
 # Step 2: Review Cleaned Audit & Activate Dataset
 if staged_clean is not None and staged_audit is not None:
