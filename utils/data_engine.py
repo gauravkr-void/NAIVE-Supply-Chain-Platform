@@ -480,7 +480,8 @@ def compute_benchmark_deltas(df: pd.DataFrame) -> dict[str, float]:
 
 
 def init_session_state() -> None:
-    """Initializes session state with no pre-loaded data so the user uploads manually."""
+    """Initializes session state with the 180k historical benchmark pre-loaded on first visit."""
+    first_load = "df_active" not in st.session_state
     defaults = {
         "df_active": None,
         "data_mode": None,
@@ -495,6 +496,14 @@ def init_session_state() -> None:
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
+    if first_load and PARQUET_PATH.exists():
+        bench_df = load_benchmark_data()
+        st.session_state["df_active"] = bench_df
+        st.session_state["data_mode"] = "Benchmark (180k)"
+        st.session_state["dataset_name"] = "supply_chain_data.parquet"
+        st.session_state["capabilities"] = evaluate_capabilities(bench_df)
+        st.session_state["ingestion_audit"] = {"schema_status": "Exact Auto-Matched"}
 
 
 def render_global_sidebar() -> pd.DataFrame | None:
