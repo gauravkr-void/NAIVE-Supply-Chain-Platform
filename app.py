@@ -20,6 +20,7 @@ pages = [
     st.Page("pages/4_Customer_and_Geo.py", title="4 — Customer & Geo",),
     st.Page("pages/5_Ad_Hoc_Explorer.py", title="5 — Ad-Hoc Explorer",),
     st.Page("pages/6_Late_Delivery_AI.py", title="6 — Late Delivery AI",),
+    st.Page("pages/7_Power_BI_Dashboard.py", title="7 — Power BI Report",),
 ]
 
 pg = st.navigation(pages)
